@@ -2,6 +2,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
+  srcDir: 'src',
   modules: [
     '@nuxt/icon',
     '@nuxt/image',
@@ -9,7 +10,7 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@vueuse/nuxt',
     '@vee-validate/nuxt',
-    '@prisma/nuxt',
-    '@pinia/nuxt'
+    '@pinia/nuxt',
+    '@prisma/nuxt'
   ]
 })
