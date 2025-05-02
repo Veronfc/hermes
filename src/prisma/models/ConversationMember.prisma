@@ -8,4 +8,5 @@ model ConversationMember {
   conversation Conversation @relation(fields: [conversation_id], references: [id])
 
   @@unique([user_id, conversation_id])
+  @@map("conversation_members")
 }

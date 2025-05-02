@@ -8,8 +8,8 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate"
+    "db:generate": "npx prisma generate",
+    "db:migrate": "npx prisma migrate dev"
   },
   "dependencies": {
     "@nuxt/icon": "^1.12.0",

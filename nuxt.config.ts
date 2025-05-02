@@ -13,6 +13,10 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@prisma/nuxt'
   ],
+  prisma: {
+    generateClient: false,
+    runMigration: false
+  },
   runtimeConfig: {
     public: {
       supabase:{

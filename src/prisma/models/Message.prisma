@@ -7,5 +7,7 @@ model Message {
   updated_at      DateTime @updatedAt
 
   conversation Conversation @relation(fields: [conversation_id], references: [id])
-  sender       User         @relation(fields: [sender_id], references: [id])
+  sender       User         @relation("Sender", fields: [sender_id], references: [id])
+
+  @@map("messages")
 }
