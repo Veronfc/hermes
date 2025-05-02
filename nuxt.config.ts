@@ -12,5 +12,13 @@ export default defineNuxtConfig({
     '@vee-validate/nuxt',
     '@pinia/nuxt',
     '@prisma/nuxt'
-  ]
+  ],
+  runtimeConfig: {
+    public: {
+      supabase:{
+        url: process.env.NUXT_PUBLIC_SUPABASE_URL,
+        key: process.env.NUXT_PUBLIC_SUPABASE_KEY
+      }
+    }
+  }
 })

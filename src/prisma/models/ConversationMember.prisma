@@ -1,0 +1,11 @@
+model ConversationMember {
+  id              String   @id @default(uuid())
+  user_id         String
+  conversation_id String
+  joined_at       DateTime @default(now())
+
+  user         User         @relation(fields: [user_id], references: [id])
+  conversation Conversation @relation(fields: [conversation_id], references: [id])
+
+  @@unique([user_id, conversation_id])
+}
