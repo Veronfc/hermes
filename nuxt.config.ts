@@ -1,27 +1,38 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
-  devtools: { enabled: true },
-  srcDir: 'src',
+  srcDir: 'src/',
+  imports: {
+    dirs: [
+      'composables',
+      'utils',
+      'validation'
+    ]
+  },
   modules: [
+    '@nuxt/devtools',
     '@nuxt/icon',
     '@nuxt/image',
     '@nuxtjs/supabase',
     '@nuxtjs/tailwindcss',
-    '@vueuse/nuxt',
     '@vee-validate/nuxt',
-    '@pinia/nuxt',
     '@prisma/nuxt'
   ],
   prisma: {
     generateClient: false,
-    runMigration: false
+    runMigration: false,
+    installStudio: false,
+    prismaRoot: './src',
+    prismaSchemaPath: './src/prisma',
+  },
+  supabase: {
+    redirect: false,
   },
   runtimeConfig: {
     public: {
       supabase:{
-        url: process.env.NUXT_PUBLIC_SUPABASE_URL,
-        key: process.env.NUXT_PUBLIC_SUPABASE_KEY
+        url: process.env.SUPABASE_URL,
+        key: process.env.SUPABASE_KEY
       }
     }
   }

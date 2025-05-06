@@ -1,10 +1,9 @@
 model Conversation {
-  id         String   @id @default(uuid())
-  create_at  DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  messages Message[]
-  members  ConversationMember[]
+  id         String               @id @default(uuid())
+  create_at  DateTime             @default(now())
+  updated_at DateTime             @updatedAt
+  members    ConversationMember[]
+  messages   Message[]
 
   @@map("conversations")
 }
