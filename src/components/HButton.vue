@@ -8,7 +8,7 @@
 
 <style scoped>
 	button {
-		@apply flex cursor-pointer items-center gap-2 rounded border border-border bg-accent px-4 py-1 font-body text-lg text-bg-start duration-150;
+		@apply flex cursor-pointer items-center gap-2 rounded border border-accent-border bg-accent px-4 py-1 font-body text-lg text-bg-start duration-150;
 	}
 
 	.button-main {
@@ -18,10 +18,10 @@
 	}
 
 	.button-secondary {
-		@apply bg-transparent;
+		@apply border-accent bg-transparent text-accent;
 
 		&:hover {
-			@apply bg-accent;
+			@apply bg-accent text-text-primary;
 		}
 	}
 </style>

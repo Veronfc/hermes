@@ -19,11 +19,11 @@
 	}
 
 	.form-title {
-		@apply font-title text-2xl tracking-wider text-text-primary;
+		@apply font-title text-2xl tracking-wider text-text-primary !important;
 	}
 
 	.error-message {
-		@apply font-body text-center text-red-500 text-sm self-center inline-block !important;
+		@apply inline-block self-center text-center font-body text-sm text-red-500 !important;
 	}
 
 	.input-label {
@@ -34,7 +34,7 @@
 		}
 
 		input {
-			@apply rounded bg-input px-3 py-2 font-body text-text-primary caret-text-primary w-60;
+			@apply w-60 rounded bg-input px-3 py-2 font-body text-text-primary caret-text-primary;
 		}
 
 		input:is(:focus, :valid) + label {
@@ -54,7 +54,15 @@
 		@apply text-bg-start !important;
 	}
 
+	.icon-secondary {
+		@apply text-accent !important;
+	}
+
 	button:hover > .icon-main {
+		@apply text-text-primary !important;
+	}
+
+	button:hover > .icon-secondary {
 		@apply text-text-primary !important;
 	}
 </style>

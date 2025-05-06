@@ -5,8 +5,8 @@
 <template>
 	<div class="page">
 		<LoggedIn v-if="user" />
-		<SignupForm v-else />
+		<LoginForm v-else />
 	</div>
 </template>
 
-<style scoped></style>
+<style></style>
