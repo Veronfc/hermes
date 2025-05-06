@@ -4,7 +4,9 @@
 	const confirm = ref("");
 	const confirmMessage = ref("");
 	const valid = ref(false);
+	const success = ref(false);
 
+	//TODO: Display errors for each input
 	const { handleSubmit, errors } = useForm({
 		validationSchema: toTypedSchema(signupSchema)
 	});
@@ -22,14 +24,24 @@
 			valid.value = true;
 		}
 	});
-	//TODO: display error messages
-	
+
 	const signup = handleSubmit(async (values) => {
 		if (!valid.value) {
+			//TODO: Display passwords not matching error
 			alert(confirmMessage.value);
 			return;
 		}
-	
+
+		const response = await useFetch(
+			`/api/check-username?username=${values.username}`
+		);
+
+		if (response.data.value) {
+			//TODO: Display username already in use error
+			alert("Please enter a different username");
+			return;
+		}
+
 		const { data, error } = await supabase.auth.signUp({
 			email: values.email,
 			password: values.password,
@@ -40,19 +52,39 @@
 				emailRedirectTo: "http://localhost:3000/confirm"
 			}
 		});
-	
-		if (error) {
-			alert("Database error")
-			console.error(
-			`Message: ${error.message}\nCause: ${error.cause}\nCode: ${error.code}\nName: ${error.name}\nStatus: ${error.status}\nStack: ${error.stack}`)
-			return;
-		};
 
-		alert("Account created")
+		if (
+			data.session === null &&
+			error === null &&
+			data.user?.identities?.length === 0
+		) {
+			//TODO: Display email addresss already in use error
+			alert("Please enter a different email address");
+			return;
+		}
+
+		if (error) {
+			//TODO: Display other database errors
+			alert("Database error");
+			console.error(
+				`Message: ${error.message}\nCode: ${error.code}\nName: ${error.name}`
+			);
+			return;
+		}
+
+		success.value = true;
 	});
 </script>
 <template>
-	<div class="modal signup">
+	<div class="modal confirm" v-if="success">
+		<span class="form-title">Confirm email address</span>
+		<span
+			>We have sent a verification email to {{ email }}.<br />
+			Please click on the confirmation link to confirm your email and
+			login.</span
+		>
+	</div>
+	<div class="modal signup" v-else>
 		<span class="form-title">Create account</span>
 		<form @submit="signup">
 			<section>
@@ -67,26 +99,22 @@
 			</section>
 			<section>
 				<div class="input-label">
+					<!--TODO: Add password visibility toggle-->
 					<input name="password" type="password" v-model="password" required />
 					<label>Password</label>
 				</div>
 				<div class="input-label">
-					<input
-						name="confirm"
-						type="password"
-						v-model="confirm"
-						required />
+					<!--TODO: Add password visibility toggle-->
+					<input name="confirm" type="password" v-model="confirm" required />
 					<label>Confirm password</label>
 				</div>
 			</section>
 			<section>
-				<HButton class="button-main"
-					>Sign up<Icon name="mdi:account-plus" class="icon-main"></Icon
-				></HButton>
+				<HButton class="button-main">Sign up</HButton>
 				<div class="line"></div>
 				<span
 					>Already have account?
-					<NuxtLink class="link">Login here</NuxtLink></span
+					<NuxtLink to="/login" class="link">Login here</NuxtLink></span
 				>
 			</section>
 		</form>
@@ -106,9 +134,17 @@
 				}
 
 				span {
-					@apply text-text-primary;
+					@apply font-body text-text-primary;
 				}
 			}
+		}
+	}
+
+	.confirm {
+		@apply w-96 gap-4;
+
+		span {
+			@apply text-center font-body text-text-primary;
 		}
 	}
 </style>
