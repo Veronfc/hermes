@@ -4,8 +4,8 @@
 
 <template>
 	<div class="page">
-		<LoggedIn v-if="user" />
-		<LoginForm v-else />
+		<LoginForm v-if="!user" />
+		<LoggedIn v-else />
 	</div>
 </template>
 

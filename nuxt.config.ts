@@ -22,8 +22,8 @@ export default defineNuxtConfig({
     generateClient: false,
     runMigration: false,
     installStudio: false,
-    prismaRoot: './src',
-    prismaSchemaPath: './src/prisma',
+    prismaRoot: './src/server',
+    prismaSchemaPath: './src/server/prisma',
   },
   supabase: {
     redirect: false,

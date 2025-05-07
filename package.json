@@ -28,7 +28,7 @@
     "zod": "^3.24.3"
   },
   "prisma": {
-    "schema": "./src/prisma"
+    "schema": "./src/server/prisma"
   },
   "devDependencies": {
     "@nuxt/devtools": "^2.4.0"

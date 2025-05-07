@@ -5,7 +5,7 @@
 
 <template>
 	<div class="modal logged-in">
-		<span class="form-title">You're already logged in</span>
+		<span class="modal-title">You're already logged in</span>
 		<span>Logged in as: {{ user?.user_metadata.username }}</span>
 		<div class="buttons">
 			<HButton @button-click="navigateTo('/')" class="button-main"
