@@ -18,7 +18,7 @@
 		}
 	}
 
-	.form-title {
+	.modal-title {
 		@apply font-title text-3xl tracking-wider text-text-primary !important;
 	}
 

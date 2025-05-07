@@ -2,7 +2,7 @@
 .output
 node_modules
 
-src/prisma/migrations
+src/server/prisma/migrations
 
 .env
 .prettierrc

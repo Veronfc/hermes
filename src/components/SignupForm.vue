@@ -4,6 +4,7 @@
 	const confirm = ref("");
 	const confirmMessage = ref("");
 	const success = ref(false);
+	const loading = ref(false)
 
 	const { handleSubmit, errors } = useForm({
 		validationSchema: toTypedSchema(signupSchema)
@@ -27,11 +28,15 @@
 			return;
 		}
 
-		const response = await useFetch(
-			`/api/check-username?username=${values.username}`
+		const response = await $fetch('/api/check-username', {
+				method: 'post',
+				query: {
+					username: values.username
+				}
+			}
 		);
 
-		if (response.data.value) {
+		if (response) {
 			alert("Please enter a different username");
 			return;
 		}
@@ -69,7 +74,7 @@
 </script>
 <template>
 	<div class="modal confirm" v-if="success">
-		<span class="form-title">Confirm email address</span>
+		<span class="modal-title">Confirm email address</span>
 		<span
 			>We have sent a verification email to {{ email }}.<br />
 			Please click on the confirmation link to confirm your email and

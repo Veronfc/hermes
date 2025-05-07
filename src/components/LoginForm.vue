@@ -42,7 +42,7 @@
 
 <template>
 	<div class="modal login">
-		<span class="form-title">Welcome back</span>
+		<span class="modal-title">Welcome back</span>
 		<form @submit="login">
 			<section>
 				<HInput
