@@ -8,14 +8,6 @@
 	const { value: email } = useField("email");
 	const { value: password } = useField("password");
 
-	const passwordFieldType = ref("password")
-	const showPassword = ref(false)
-
-	watch(showPassword, () => {
-		if (showPassword.value) passwordFieldType.value = "text"
-		else passwordFieldType.value = "password"
-	})
-
 	const login = handleSubmit(async (values) => {
 		const { data, error } = await supabase.auth.signInWithPassword({
 			email: values.email,
@@ -53,21 +45,20 @@
 		<span class="form-title">Welcome back</span>
 		<form @submit="login">
 			<section>
-				<div class="input-label">
-					<input name="email" v-model="email" :class="{invalid: errors.email}" required />
-					<label>Email</label>
-					<span class="error-message" v-if="errors.email">{{ errors.email }}</span>
-				</div>
-				<div class="input-label">
-					<input name="password" :type="passwordFieldType" v-model="password" class="password" :class="{invalid: errors.password}" autocomplete="off" required />
-					<label>Password</label>
-					<button @click.prevent="showPassword = !showPassword"  title="Toggle password visibility">
-						<icon name="mdi:eye-outline" class="toggle" v-show="showPassword"></icon>
-						<icon name="mdi:eye-off-outline" class="toggle" v-show="!showPassword"></icon>
-					</button>
-
-					<span class="error-message" v-if="errors.password">{{ errors.password }}</span>
-				</div>
+				<HInput
+					input-name="email"
+					v-model="email"
+					label="Email"
+					:error-condition="errors.email"
+					:input-required="true"
+					:is-password="false" />
+				<HInput
+					input-name="password"
+					v-model="password"
+					label="Password"
+					:error-condition="errors.password"
+					:input-required="true"
+					:is-password="true" />
 			</section>
 			<section>
 				<HButton class="button-main">Login</HButton>

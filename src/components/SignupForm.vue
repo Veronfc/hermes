@@ -13,14 +13,6 @@
 	const { value: password } = useField("password");
 	const { value: username } = useField("username");
 
-	const passwordFieldType = ref("password")
-	const showPassword = ref(false)
-
-	watch(showPassword, () => {
-		if (showPassword.value) passwordFieldType.value = "text"
-		else passwordFieldType.value = "password"
-	})
-
 	watch([password, confirm], ([password, confirm]) => {
 		if (password !== confirm) {
 			confirmMessage.value = "Passwords do not match";
@@ -30,7 +22,7 @@
 	});
 
 	const signup = handleSubmit(async (values) => {
-		if (!confirmMessage.value) {
+		if (confirmMessage.value) {
 			alert(confirmMessage.value);
 			return;
 		}
@@ -88,36 +80,36 @@
 		<span class="form-title">Create account</span>
 		<form @submit="signup">
 			<section>
-				<div class="input-label">
-					<input name="email" v-model="email" :class="{invalid: errors.email}" required />
-					<label>Email</label>
-					<span class="error-message" v-if="errors.email">{{ errors.email }}</span>
-				</div>
-				<div class="input-label">
-					<input name="username" v-model="username" :class="{invalid: errors.username}" required />
-					<label>Username</label>
-					<span class="error-message" v-if="errors.username">{{ errors.username }}</span>
-				</div>
+				<HInput
+					input-name="email"
+					v-model="email"
+					label="Email"
+					:error-condition="errors.email"
+					:input-required="true"
+					:is-password="false" />
+				<HInput
+					input-name="username"
+					v-model="username"
+					label="Username"
+					:error-condition="errors.username"
+					:input-required="true"
+					:is-password="false" />
 			</section>
 			<section>
-				<div class="input-label">
-					<input name="password" :type="passwordFieldType" v-model="password" class="password" :class="{invalid: errors.password}" autocomplete="off" required />
-					<label>Password</label>
-					<span class="error-message" v-if="errors.password">{{ errors.password }}</span>
-					<button @click.prevent="showPassword = !showPassword"  title="Toggle password visibility">
-						<icon name="mdi:eye-outline" class="toggle" v-show="showPassword"></icon>
-						<icon name="mdi:eye-off-outline" class="toggle" v-show="!showPassword"></icon>
-					</button>
-				</div>
-				<div class="input-label">
-					<input name="confirm" :type="passwordFieldType" v-model="confirm" class="password" :class="{invalid: confirmMessage}" autocomplete="off" required />
-					<label>Confirm password</label>
-					<span class="error-message" v-if="confirmMessage">{{ confirmMessage }}</span>
-					<button @click.prevent="showPassword = !showPassword"  title="Toggle password visibility">
-						<icon name="mdi:eye-outline" class="toggle" v-show="showPassword"></icon>
-						<icon name="mdi:eye-off-outline" class="toggle" v-show="!showPassword"></icon>
-					</button>
-				</div>
+				<HInput
+					input-name="password"
+					v-model="password"
+					label="Password"
+					:error-condition="errors.password"
+					:input-required="true"
+					:is-password="true" />
+				<HInput
+					input-name="confirm"
+					v-model="confirm"
+					label="Confirm password"
+					:error-condition="confirmMessage"
+					:input-required="true"
+					:is-password="true" />
 			</section>
 			<section>
 				<HButton class="button-main">Sign up</HButton>

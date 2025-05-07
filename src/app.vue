@@ -22,38 +22,6 @@
 		@apply font-title text-3xl tracking-wider text-text-primary !important;
 	}
 
-	.input-label {
-		@apply relative flex flex-col gap-1;
-
-		label {
-			@apply pointer-events-none absolute flex translate-x-3 translate-y-2 flex-col font-body text-text-secondary duration-300;
-		}
-
-		input {
-			@apply w-60 rounded bg-input px-3 py-2 font-body text-text-primary caret-text-primary;
-		}
-
-		input:is(:focus, :valid) + label {
-			@apply -translate-y-7 translate-x-1 text-sm text-text-secondary;
-		}
-
-		.error-message {
-			@apply text-red-500 text-sm self-start !important;
-		}
-
-		.invalid {
-			@apply border border-red-500;
-		}
-
-		.password {
-			@apply pr-10;
-		}
-
-		.toggle {
-			@apply absolute right-3 top-[.8rem] cursor-pointer;
-		}
-	}
-
 	.link {
 		@apply cursor-pointer text-accent duration-150;
 
