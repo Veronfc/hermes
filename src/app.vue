@@ -19,11 +19,7 @@
 	}
 
 	.form-title {
-		@apply font-title text-2xl tracking-wider text-text-primary !important;
-	}
-
-	.error-message {
-		@apply inline-block self-center text-center font-body text-sm text-red-500 !important;
+		@apply font-title text-3xl tracking-wider text-text-primary !important;
 	}
 
 	.input-label {
@@ -39,6 +35,22 @@
 
 		input:is(:focus, :valid) + label {
 			@apply -translate-y-7 translate-x-1 text-sm text-text-secondary;
+		}
+
+		.error-message {
+			@apply text-red-500 text-sm self-start !important;
+		}
+
+		.invalid {
+			@apply border border-red-500;
+		}
+
+		.password {
+			@apply pr-10;
+		}
+
+		.toggle {
+			@apply absolute right-3 top-[.8rem] cursor-pointer;
 		}
 	}
 
