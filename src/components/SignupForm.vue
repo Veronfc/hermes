@@ -3,10 +3,8 @@
 
 	const confirm = ref("");
 	const confirmMessage = ref("");
-	const valid = ref(false);
 	const success = ref(false);
 
-	//TODO: Display errors for each input
 	const { handleSubmit, errors } = useForm({
 		validationSchema: toTypedSchema(signupSchema)
 	});
@@ -15,19 +13,24 @@
 	const { value: password } = useField("password");
 	const { value: username } = useField("username");
 
+	const passwordFieldType = ref("password")
+	const showPassword = ref(false)
+
+	watch(showPassword, () => {
+		if (showPassword.value) passwordFieldType.value = "text"
+		else passwordFieldType.value = "password"
+	})
+
 	watch([password, confirm], ([password, confirm]) => {
 		if (password !== confirm) {
 			confirmMessage.value = "Passwords do not match";
-			valid.value = false;
 		} else {
 			confirmMessage.value = "";
-			valid.value = true;
 		}
 	});
 
 	const signup = handleSubmit(async (values) => {
-		if (!valid.value) {
-			//TODO: Display passwords not matching error
+		if (!confirmMessage.value) {
 			alert(confirmMessage.value);
 			return;
 		}
@@ -37,7 +40,6 @@
 		);
 
 		if (response.data.value) {
-			//TODO: Display username already in use error
 			alert("Please enter a different username");
 			return;
 		}
@@ -58,13 +60,11 @@
 			error === null &&
 			data.user?.identities?.length === 0
 		) {
-			//TODO: Display email addresss already in use error
 			alert("Please enter a different email address");
 			return;
 		}
 
 		if (error) {
-			//TODO: Display other database errors
 			alert("Database error");
 			console.error(
 				`Message: ${error.message}\nCode: ${error.code}\nName: ${error.name}`
@@ -89,24 +89,34 @@
 		<form @submit="signup">
 			<section>
 				<div class="input-label">
-					<input name="email" v-model="email" required />
+					<input name="email" v-model="email" :class="{invalid: errors.email}" required />
 					<label>Email</label>
+					<span class="error-message" v-if="errors.email">{{ errors.email }}</span>
 				</div>
 				<div class="input-label">
-					<input name="username" v-model="username" required />
+					<input name="username" v-model="username" :class="{invalid: errors.username}" required />
 					<label>Username</label>
+					<span class="error-message" v-if="errors.username">{{ errors.username }}</span>
 				</div>
 			</section>
 			<section>
 				<div class="input-label">
-					<!--TODO: Add password visibility toggle-->
-					<input name="password" type="password" v-model="password" required />
+					<input name="password" :type="passwordFieldType" v-model="password" class="password" :class="{invalid: errors.password}" autocomplete="off" required />
 					<label>Password</label>
+					<span class="error-message" v-if="errors.password">{{ errors.password }}</span>
+					<button @click.prevent="showPassword = !showPassword"  title="Toggle password visibility">
+						<icon name="mdi:eye-outline" class="toggle" v-show="showPassword"></icon>
+						<icon name="mdi:eye-off-outline" class="toggle" v-show="!showPassword"></icon>
+					</button>
 				</div>
 				<div class="input-label">
-					<!--TODO: Add password visibility toggle-->
-					<input name="confirm" type="password" v-model="confirm" required />
+					<input name="confirm" :type="passwordFieldType" v-model="confirm" class="password" :class="{invalid: confirmMessage}" autocomplete="off" required />
 					<label>Confirm password</label>
+					<span class="error-message" v-if="confirmMessage">{{ confirmMessage }}</span>
+					<button @click.prevent="showPassword = !showPassword"  title="Toggle password visibility">
+						<icon name="mdi:eye-outline" class="toggle" v-show="showPassword"></icon>
+						<icon name="mdi:eye-off-outline" class="toggle" v-show="!showPassword"></icon>
+					</button>
 				</div>
 			</section>
 			<section>

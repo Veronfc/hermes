@@ -1,13 +1,20 @@
 <script setup lang="ts">
 	const supabase = useSupabaseClient();
 
-	//TODO: Display errors for each input
 	const { handleSubmit, errors } = useForm({
 		validationSchema: toTypedSchema(loginSchema)
 	});
 
 	const { value: email } = useField("email");
 	const { value: password } = useField("password");
+
+	const passwordFieldType = ref("password")
+	const showPassword = ref(false)
+
+	watch(showPassword, () => {
+		if (showPassword.value) passwordFieldType.value = "text"
+		else passwordFieldType.value = "password"
+	})
 
 	const login = handleSubmit(async (values) => {
 		const { data, error } = await supabase.auth.signInWithPassword({
@@ -16,21 +23,20 @@
 		});
 
 		if (error) {
-			//TODO: Display email not confirmed error
 			if (error.code === "email_not_confirmed") {
 				alert(
 					"Email not verified.\nPlease click on the confirmation link in the verification email sent to you."
 				);
+
 				return;
 			}
 
-			//TODO: Display email does not exist or incorrect password error
 			if (error.code === "invalid_credentials") {
 				alert("Incorrect email address or password.");
+
 				return;
 			}
 
-			//TODO: Display other database errors
 			alert("Database error");
 			console.error(
 				`Message: ${error.message}\nCode: ${error.code}\nName: ${error.name}`
@@ -48,13 +54,19 @@
 		<form @submit="login">
 			<section>
 				<div class="input-label">
-					<input name="email" v-model="email" required />
+					<input name="email" v-model="email" :class="{invalid: errors.email}" required />
 					<label>Email</label>
+					<span class="error-message" v-if="errors.email">{{ errors.email }}</span>
 				</div>
 				<div class="input-label">
-					<!--TODO: Add password visibility toggle-->
-					<input name="password" type="password" v-model="password" required />
+					<input name="password" :type="passwordFieldType" v-model="password" class="password" :class="{invalid: errors.password}" autocomplete="off" required />
 					<label>Password</label>
+					<button @click.prevent="showPassword = !showPassword"  title="Toggle password visibility">
+						<icon name="mdi:eye-outline" class="toggle" v-show="showPassword"></icon>
+						<icon name="mdi:eye-off-outline" class="toggle" v-show="!showPassword"></icon>
+					</button>
+
+					<span class="error-message" v-if="errors.password">{{ errors.password }}</span>
 				</div>
 			</section>
 			<section>
@@ -72,7 +84,7 @@
 <style scoped>
 	.login {
 		form {
-			@apply flex flex-col gap-12 pt-12;
+			@apply flex flex-col gap-8 pt-12;
 
 			section {
 				@apply flex items-center justify-center gap-4;
