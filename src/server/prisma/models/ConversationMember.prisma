@@ -3,8 +3,8 @@ model ConversationMember {
   user_id         String       @db.Uuid
   conversation_id String
   joined_at       DateTime     @default(now())
-  conversation    Conversation @relation(fields: [conversation_id], references: [id])
-  user            User         @relation(fields: [user_id], references: [id])
+  conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  user            User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, conversation_id])
   @@map("conversation_members")

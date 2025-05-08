@@ -4,7 +4,7 @@
 	const confirm = ref("");
 	const confirmMessage = ref("");
 	const success = ref(false);
-	const loading = ref(false)
+	const loading = ref(false);
 
 	const { handleSubmit, errors } = useForm({
 		validationSchema: toTypedSchema(signupSchema)
@@ -28,13 +28,12 @@
 			return;
 		}
 
-		const response = await $fetch('/api/check-username', {
-				method: 'post',
-				query: {
-					username: values.username
-				}
+		const response = await $fetch("/api/users/check-username", {
+			method: "post",
+			query: {
+				username: values.username
 			}
-		);
+		});
 
 		if (response) {
 			alert("Please enter a different username");
@@ -82,7 +81,7 @@
 		>
 	</div>
 	<div class="modal signup" v-else>
-		<span class="form-title">Create account</span>
+		<span class="modal-title">Create account</span>
 		<form @submit="signup">
 			<section>
 				<HInput

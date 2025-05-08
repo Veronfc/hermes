@@ -1,9 +1,15 @@
 model Conversation {
   id         String               @id @default(uuid())
-  create_at  DateTime             @default(now())
-  updated_at DateTime             @updatedAt
+  created_at DateTime             @default(now())
+  updated_at DateTime?            @updatedAt
+  type       Type                 @default(direct)
   members    ConversationMember[]
   messages   Message[]
 
   @@map("conversations")
+}
+
+enum Type {
+  direct
+  group
 }

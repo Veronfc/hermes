@@ -1,19 +1,28 @@
 <script lang="ts" setup>
+	const route = useRoute();
+	const tokenHash = route.query.token_hash?.toString();
+	const supabase = useSupabaseClient();
 	const user = useSupabaseUser();
 
-	watch(
-		user,
-		() => {
-			if (user.value) {
-				setTimeout(() => {
-					return navigateTo("/");
-				}, 3000)
-			} else {
-				navigateTo("/")
-			}
-		},
-		{ immediate: true }
-	);
+	if (!tokenHash || user) {
+		navigateTo("/");
+	}
+
+	const { error } = await supabase.auth.verifyOtp({
+		token_hash: tokenHash!,
+		type: "email"
+	});
+
+	if (error) {
+		alert("Database error");
+		console.error(
+			`Message: ${error.message}\nCode: ${error.code}\nName: ${error.name}`
+		);
+	} else {
+		setTimeout(() => {
+			return navigateTo("/");
+		}, 3000);
+	}
 </script>
 
 <template>
@@ -27,6 +36,6 @@
 
 <style scoped>
 	span:nth-child(2) {
-		@apply font-body text-text-secondary pt-4;
+		@apply pt-4 font-body text-text-secondary;
 	}
 </style>
