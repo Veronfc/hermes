@@ -20,6 +20,23 @@
 					"Email not verified.\nPlease click on the confirmation link in the verification email sent to you."
 				);
 
+				const { error: resendError } = await supabase.auth.resend({
+					type: "signup",
+					email: values.email,
+					options: {
+						emailRedirectTo: "http://localhost:3000/confirm"
+					}
+				});
+
+				if (resendError) {
+					alert("Database error.\n\nPlease try again in a minute.");
+					console.error(
+						`Message: ${resendError.message}\nCode: ${resendError.code}\nName: ${resendError.name}`
+					);
+
+					return;
+				}
+
 				return;
 			}
 

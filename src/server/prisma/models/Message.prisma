@@ -4,8 +4,8 @@ model Message {
   sender_id       String       @db.Uuid
   content         String
   created_at      DateTime     @default(now())
-  updated_at      DateTime     @updatedAt
-  conversation    Conversation @relation(fields: [conversation_id], references: [id])
+  updated_at      DateTime?     @updatedAt
+  conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
   sender          User         @relation("Sender", fields: [sender_id], references: [id])
 
   @@map("messages")
