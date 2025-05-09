@@ -120,7 +120,9 @@
 				<div class="line"></div>
 				<span
 					>Already have account?
-					<NuxtLink to="/login" class="link">Login here</NuxtLink></span
+					<NuxtLink to="/login" class="link"
+						>Login here</NuxtLink
+					></span
 				>
 			</section>
 		</form>
