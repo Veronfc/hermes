@@ -2,6 +2,7 @@ import prisma from "~/server/lib/prisma";
 import { sendMessageSchema } from "~/server/validation/messages";
 import { serverSupabaseUser } from "#supabase/server";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import {H3Error} from 'h3'
 
 export default defineEventHandler(async (event) => {
 	let user = null;
@@ -9,8 +10,10 @@ export default defineEventHandler(async (event) => {
 	try {
 		user = await serverSupabaseUser(event);
 	} catch (error) {
-		setResponseStatus(event, 401);
-		return { message: "You must be logged in to send messages" };
+		throw createError({
+			statusCode: 401,
+			statusMessage: "You must be logged in to send messages"
+		})
 	}
 
 	const result = await readValidatedBody(event, (body) =>
@@ -22,8 +25,10 @@ export default defineEventHandler(async (event) => {
 			.map((issue) => `${issue.path.join(".")} - ${issue.message}`)
 			.join("; ");
 
-		setResponseStatus(event, 400);
-		return { message: errors };
+		throw createError({
+			statusCode: 400,
+			statusMessage: errors
+		})
 	}
 
 	const senderId = user!.id;
@@ -43,8 +48,10 @@ export default defineEventHandler(async (event) => {
 		});
 
 		if (!conversationMember) {
-			setResponseStatus(event, 403);
-			return { message: "You're are not a member of this conversation" };
+			throw createError({
+				statusCode: 403,
+				statusMessage: "You're are not a member of this conversation"
+			})
 		}
 
 		await prisma.message.create({
@@ -58,12 +65,22 @@ export default defineEventHandler(async (event) => {
 		setResponseStatus(event, 201);
 		return { message: "Message sent successfully" };
 	} catch (error) {
+		if (error instanceof H3Error) {
+			if (error.statusCode === 403) {
+				throw error
+			}
+		}
+		
 		if (error instanceof PrismaClientKnownRequestError) {
-			setResponseStatus(event, 500);
-			return { message: error.message };
+			throw createError({
+				statusCode: 500,
+				statusMessage: error.message
+			})
 		}
 	}
 
-	setResponseStatus(event, 500);
-	return { message: "A server error has occurred" };
+	throw createError({
+		statusCode: 500,
+		statusMessage: "A server error has occurred"
+	})
 });

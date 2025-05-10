@@ -8,6 +8,7 @@
 		navigateTo("/");
 	}
 
+	//FIXME: Fix auto-login on email confirmation
 	const { error } = await supabase.auth.verifyOtp({
 		token_hash: tokenHash!,
 		type: "email"

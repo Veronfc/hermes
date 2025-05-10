@@ -82,9 +82,7 @@
 				<div class="line"></div>
 				<span
 					>Don't have an account?
-					<NuxtLink to="/signup" class="link"
-						>Sign up here</NuxtLink
-					></span
+					<NuxtLink to="/signup" class="link">Sign up here</NuxtLink></span
 				>
 			</section>
 		</form>
