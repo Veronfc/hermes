@@ -1,0 +1,14 @@
+-- AlterTable
+ALTER TABLE "conversation_members" ALTER COLUMN "joined_at" SET DATA TYPE TIMESTAMPTZ(3);
+
+-- AlterTable
+ALTER TABLE "conversations" ALTER COLUMN "updated_at" SET DATA TYPE TIMESTAMPTZ(3),
+ALTER COLUMN "created_at" SET DATA TYPE TIMESTAMPTZ(3);
+
+-- AlterTable
+ALTER TABLE "messages" ALTER COLUMN "created_at" SET DATA TYPE TIMESTAMPTZ(3),
+ALTER COLUMN "updated_at" SET DATA TYPE TIMESTAMPTZ(3);
+
+-- AlterTable
+ALTER TABLE "users" ALTER COLUMN "created_at" SET DATA TYPE TIMESTAMPTZ(3),
+ALTER COLUMN "updated_at" SET DATA TYPE TIMESTAMPTZ(3);
