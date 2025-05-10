@@ -35,8 +35,7 @@ The primary goal of the Hermes project is to build a comprehensive messaging app
 - Handling real-time data synchronization and events.
 - Implementing secure Row Level Security (RLS) policies in Supabase.
 - Managing file uploads and storage.
-- Structuring a Nuxt 3 application with srcDir and managing module interactions (like @nuxtjs/supabase and @prisma/nuxt).
-- Implementing core UI/UX patterns for a messaging interface, including dark/light themes and loading states.
+- Implementing core UI/UX patterns for a messaging interface, including loading states.
 - Following a structured development process with defined milestones.
 
 ## **Technology Stack**
