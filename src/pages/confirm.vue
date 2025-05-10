@@ -1,18 +1,19 @@
 <script lang="ts" setup>
-	const route = useRoute();
-	const tokenHash = route.query.token_hash?.toString();
 	const supabase = useSupabaseClient();
-	const user = useSupabaseUser();
+	const code = useRoute().query.code?.toString();
+	
+	try {
+		const user = useSupabaseUser();
+		navigateTo('/')
+	} catch {
+		
+	}
 
-	if (!tokenHash || user) {
+	if (!code) {
 		navigateTo("/");
 	}
 
-	//FIXME: Fix auto-login on email confirmation
-	const { error } = await supabase.auth.verifyOtp({
-		token_hash: tokenHash!,
-		type: "email"
-	});
+	const { error } = await supabase.auth.exchangeCodeForSession(code!)
 
 	if (error) {
 		alert("Database error");
