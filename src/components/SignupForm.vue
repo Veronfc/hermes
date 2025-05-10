@@ -75,7 +75,7 @@
 	<div class="modal confirm" v-if="success">
 		<span class="modal-title">Confirm email address</span>
 		<span
-			>A verification email has been sent to {{ email }}.<br /><br/>
+			>A verification email has been sent to {{ email }}.<br /><br />
 			Please click on the confirmation link to confirm your email and
 			login.</span
 		>

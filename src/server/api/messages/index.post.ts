@@ -2,7 +2,7 @@ import prisma from "~/server/lib/prisma";
 import { sendMessageSchema } from "~/server/validation/messages";
 import { serverSupabaseUser } from "#supabase/server";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import {H3Error} from 'h3'
+import { H3Error } from "h3";
 
 export default defineEventHandler(async (event) => {
 	let user = null;
@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
 		throw createError({
 			statusCode: 401,
 			statusMessage: "You must be logged in to send messages"
-		})
+		});
 	}
 
 	const result = await readValidatedBody(event, (body) =>
@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
 		throw createError({
 			statusCode: 400,
 			statusMessage: errors
-		})
+		});
 	}
 
 	const senderId = user!.id;
@@ -51,7 +51,7 @@ export default defineEventHandler(async (event) => {
 			throw createError({
 				statusCode: 403,
 				statusMessage: "You're are not a member of this conversation"
-			})
+			});
 		}
 
 		await prisma.message.create({
@@ -67,20 +67,20 @@ export default defineEventHandler(async (event) => {
 	} catch (error) {
 		if (error instanceof H3Error) {
 			if (error.statusCode === 403) {
-				throw error
+				throw error;
 			}
 		}
-		
+
 		if (error instanceof PrismaClientKnownRequestError) {
 			throw createError({
 				statusCode: 500,
 				statusMessage: error.message
-			})
+			});
 		}
 	}
 
 	throw createError({
 		statusCode: 500,
 		statusMessage: "A server error has occurred"
-	})
+	});
 });
