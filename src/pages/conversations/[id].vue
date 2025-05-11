@@ -1,4 +1,7 @@
 <script setup lang="ts">
+	definePageMeta({
+		layout: "conversations"
+	});
 	import type { RealtimeChannel } from "@supabase/realtime-js";
 	import type { Message } from "@prisma/client";
 
@@ -50,9 +53,13 @@
 </script>
 
 <template>
-	<div class="page">
+	<div class="page conversation">
 		<Messages :conversation-id="conversationId" :messages="messages" />
 	</div>
 </template>
 
-<style scoped></style>
+<style scoped>
+	.conversation {
+		@apply w-full !important;
+	}
+</style>

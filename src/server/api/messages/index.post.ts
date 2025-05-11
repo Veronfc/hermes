@@ -62,6 +62,15 @@ export default defineEventHandler(async (event) => {
 			}
 		});
 
+		await prisma.conversation.update({
+			where: {
+				id: conversationId,
+			},
+			data: {
+				updated_at: new Date()
+			}
+		})
+
 		setResponseStatus(event, 201);
 		return { message: "Message sent successfully" };
 	} catch (error) {
