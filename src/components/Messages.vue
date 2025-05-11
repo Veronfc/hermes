@@ -2,6 +2,7 @@
 	import type { Message } from "@prisma/client";
 	import { FetchError } from "ofetch";
 
+	const {refresh} = await useConversations()
 	const user = useSupabaseUser();
 	const props = defineProps<{
 		messages: Message[];
@@ -20,12 +21,25 @@
 	const errorMessage = ref("");
 	let errorTimeout: ReturnType<typeof setTimeout>;
 
-	const convertUtcToLocal = (timestamp: Date) => {
+  const convertUtcToLocal = (timestamp: Date) => {
+    if (!timestamp) {
+      return
+    }
+
 		const utc = new Date(timestamp);
+    const today = new Date()
+
+    if (utc.getDate() !== today.getDate()) {
+      return utc.toLocaleString("en-GB", {
+			hour12: false,
+			timeStyle: 'short',
+			dateStyle: "medium"
+		});
+    }
+
 		return utc.toLocaleString("en-GB", {
 			hour12: false,
 			timeStyle: "short",
-			dateStyle: "medium"
 		});
 	};
 
@@ -43,6 +57,7 @@
 						content: values.content
 					}
 				});
+				refresh()
 				content.value = "";
 			} catch (error) {
 				if (error instanceof FetchError) {
@@ -65,7 +80,7 @@
 			await nextTick();
 			scrollAnchor.value?.scrollIntoView({ behavior: "smooth" });
 		},
-		{ immediate: true, deep: true }
+		{ deep: true }
 	);
 
 	watch(
@@ -80,6 +95,11 @@
 			}
 		}
 	);
+
+	onMounted(async () => {
+		await nextTick();
+		scrollAnchor.value?.scrollIntoView();
+	})
 </script>
 
 <template>

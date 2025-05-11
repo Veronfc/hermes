@@ -1,19 +1,17 @@
 <script lang="ts" setup>
 	const supabase = useSupabaseClient();
 	const code = useRoute().query.code?.toString();
-	
+
 	try {
 		const user = useSupabaseUser();
-		navigateTo('/')
-	} catch {
-		
-	}
+		navigateTo("/conversations");
+	} catch {}
 
 	if (!code) {
-		navigateTo("/");
+		navigateTo("/conversations");
 	}
 
-	const { error } = await supabase.auth.exchangeCodeForSession(code!)
+	const { error } = await supabase.auth.exchangeCodeForSession(code!);
 
 	if (error) {
 		alert("Database error");
@@ -22,7 +20,7 @@
 		);
 	} else {
 		setTimeout(() => {
-			return navigateTo("/");
+			return navigateTo("/conversations");
 		}, 3000);
 	}
 </script>
