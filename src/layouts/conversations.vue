@@ -1,24 +1,26 @@
 <script lang="ts" setup>
-  const {data: conversations} = await useConversations()
+import { useConversationStore } from '~/stores/useConversationStore';
 
-  const convertUtcToLocal = (timestamp?: Date) => {
-    if (!timestamp) {
-      return
-    }
+	const conversationStore = useConversationStore()
+
+	const convertUtcToLocal = (timestamp?: Date) => {
+		if (!timestamp) {
+			return;
+		}
 
 		const utc = new Date(timestamp);
-    const today = new Date()
+		const today = new Date();
 
-    if (utc.getDate() !== today.getDate()) {
-      return utc.toLocaleString("en-GB", {
-			hour12: false,
-			dateStyle: "medium"
-		});
-    }
+		if (utc.getDate() !== today.getDate()) {
+			return utc.toLocaleString("en-GB", {
+				hour12: false,
+				dateStyle: "medium"
+			});
+		}
 
 		return utc.toLocaleString("en-GB", {
 			hour12: false,
-			timeStyle: "short",
+			timeStyle: "short"
 		});
 	};
 </script>
@@ -28,23 +30,20 @@
 		<div class="list">
 			<NuxtLink
 				class="conversation"
-				v-for="conversation in conversations"
+				v-for="conversation in conversationStore.conversations"
 				:key="conversation.id"
 				:to="`/conversations/${conversation.id}`">
 				<span class="username" :key="conversation.members[0].user.id">
 					{{ conversation.members[0].user.username }}
-        </span>
+				</span>
 				<span class="message">
-					{{ conversation.messages[0]?.content }}
-        </span>
+					{{ conversation.last_message }}
+				</span>
 				<span class="time">
-					{{ convertUtcToLocal(conversation.messages[0]?.created_at) }}
-        </span>
+					{{ convertUtcToLocal(conversation.updated_at) }}
+				</span>
 			</NuxtLink>
-			<Icon
-				class="loader"
-				name="svg-spinners:180-ring"
-				v-if="!conversations"></Icon>
+			<Icon class="loader" name="svg-spinners:180-ring" v-if="conversationStore.isLoading"></Icon>
 		</div>
 		<slot />
 	</div>
@@ -55,31 +54,32 @@
 		@apply flex h-full w-full flex-row;
 
 		.list {
-			@apply relative flex flex-col min-w-[20rem] max-w-[20rem] bg-modal p-4 gap-4;
+			@apply relative flex min-w-[20rem] max-w-[20rem] flex-col gap-4 bg-modal p-4;
 
 			.conversation {
-				@apply h-24 font-body p-4 py-2 text-text-primary rounded-2xl bg-input flex flex-col border border-border justify-center box-border opacity-75;
+				@apply box-border flex h-24 flex-col justify-center rounded-2xl border border-border bg-input p-4 py-2 font-body text-text-primary opacity-75;
 
-        &:hover {
-          @apply border-accent-border;
-        }
+				&:hover {
+					@apply border-accent-border;
+				}
 
-        .username {
-          @apply font-title tracking-widest;
-        }
+				.username {
+					@apply font-title tracking-widest;
+				}
 
-        .message {
-          @apply truncate;
-        }
+				.message {
+					@apply truncate;
+				}
 
-        .time {
-          @apply text-text-secondary text-xs text-right border-t pt-1;
-        }
+				.time {
+					@apply border-t pt-1 text-right text-xs text-text-secondary;
+				}
 			}
 
-      .router-link-active, .router-link-exact-active {
-        @apply border-accent-border opacity-100 border-2;
-      }
+			.router-link-active,
+			.router-link-exact-active {
+				@apply border-2 border-accent-border opacity-100;
+			}
 		}
 
 		.loader {

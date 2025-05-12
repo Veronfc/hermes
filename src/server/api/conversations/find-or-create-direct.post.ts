@@ -9,8 +9,10 @@ export default defineEventHandler(async (event) => {
 	try {
 		user = await serverSupabaseUser(event);
 	} catch (error) {
-		setResponseStatus(event, 401);
-		return { message: "You must be logged in to view conversations" };
+		throw createError({
+			statusCode: 401,
+			statusMessage: "You're not logged in"
+		});
 	}
 
 	const result = await readValidatedBody(event, (body) =>
@@ -22,16 +24,20 @@ export default defineEventHandler(async (event) => {
 			.map((issue) => `${issue.path.join(".")} - ${issue.message}`)
 			.join("; ");
 
-		setResponseStatus(event, 400);
-		return { message: errors };
+		throw createError({
+			statusCode: 400,
+			statusMessage: errors
+		});
 	}
 
 	const memberId = user!.id;
 	const otherMemberId = result.data.otherMemberId;
 
 	if (memberId === otherMemberId) {
-		setResponseStatus(event, 400);
-		return { message: "You can not start a conversation with yourself" };
+		throw createError({
+			statusCode: 400,
+			statusMessage: "You can not start a conversation with yourself"
+		});
 	}
 
 	const conversation = await prisma.conversation.findFirst({
@@ -60,7 +66,6 @@ export default defineEventHandler(async (event) => {
 	});
 
 	if (conversation) {
-		setResponseStatus(event, 200);
 		return { conversationId: conversation.id };
 	}
 
@@ -81,15 +86,18 @@ export default defineEventHandler(async (event) => {
 			}
 		});
 
-		setResponseStatus(event, 200);
 		return { conversationId: newConversation.id };
 	} catch (error) {
 		if (error instanceof PrismaClientKnownRequestError) {
-			setResponseStatus(event, 500);
-			return { message: error.message };
+			throw createError({
+				statusCode: 500,
+				statusMessage: error.message
+			});
 		}
 	}
 
-	setResponseStatus(event, 500);
-	return { message: "A server error has occurred" };
+	throw createError({
+		statusCode: 500,
+		statusMessage: "A server error has occurred"
+	});
 });

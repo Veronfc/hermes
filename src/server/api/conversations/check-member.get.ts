@@ -1,8 +1,7 @@
 import prisma from "~/server/lib/prisma";
-import { postMessageSchema } from "~/server/validation/messages";
 import { serverSupabaseUser } from "#supabase/server";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { H3Error } from "h3";
+import { checkMemberSchema } from "~/server/validation/conversations";
 
 export default defineEventHandler(async (event) => {
 	let user = null;
@@ -16,8 +15,8 @@ export default defineEventHandler(async (event) => {
 		});
 	}
 
-	const result = await readValidatedBody(event, (body) =>
-		postMessageSchema.safeParse(body)
+	const result = await getValidatedQuery(event, (query) =>
+		checkMemberSchema.safeParse(query)
 	);
 
 	if (!result.success) {
@@ -31,54 +30,20 @@ export default defineEventHandler(async (event) => {
 		});
 	}
 
-	const senderId = user!.id;
-	const { conversationId, content } = result.data;
+	const conversationId = result.data.conversationId;
 
 	try {
-		const conversationMember = await prisma.conversationMember.findUnique({
+		const member = await prisma.conversationMember.findUniqueOrThrow({
 			where: {
 				user_id_conversation_id: {
-					user_id: senderId,
+					user_id: user!.id,
 					conversation_id: conversationId
 				}
-			},
-			select: {
-				conversation_id: true
 			}
 		});
 
-		if (!conversationMember) {
-			throw createError({
-				statusCode: 403,
-				statusMessage: "You're are not a member of this conversation"
-			});
-		}
-
-		const message = await prisma.message.create({
-			data: {
-				conversation_id: conversationId,
-				sender_id: senderId,
-				content: content
-			}
-		});
-
-		await prisma.conversation.update({
-			where: {
-				id: conversationId
-			},
-			data: {
-				last_message: content
-			}
-		});
-
-		return message;
+		return Boolean(member);
 	} catch (error) {
-		if (error instanceof H3Error) {
-			if (error.statusCode === 403) {
-				throw error;
-			}
-		}
-
 		if (error instanceof PrismaClientKnownRequestError) {
 			throw createError({
 				statusCode: 500,

@@ -1,27 +1,20 @@
 <script setup lang="ts">
 	definePageMeta({
-		layout: "conversations"
+		layout: "conversations",
+		middleware: ["check-login", "check-member"]
 	});
+
 	import type { RealtimeChannel } from "@supabase/realtime-js";
 	import type { Message } from "@prisma/client";
+	import { useConversationStore } from "~/stores/useConversationStore";
+	import { useMessageStore } from "~/stores/useMessageStore";
 
-	const conversationId = useRoute().params.id.toString();
+	const conversationId = useRoute().params.id as string;
+	const conversationStore = useConversationStore();
+	const messageStore = useMessageStore();
 	const supabase = useSupabaseClient();
 
-	const messages = ref<Message[]>([]);
 	let channel: RealtimeChannel;
-
-	const { data: previousMessages, error } = await supabase
-		.from("messages")
-		.select("*")
-		.eq("conversation_id", conversationId)
-		.order("created_at");
-
-	if (previousMessages) {
-		messages.value = previousMessages as Message[];
-	} else {
-		console.error(error);
-	}
 
 	const subscribeToConversation = async () => {
 		channel = supabase
@@ -33,9 +26,10 @@
 					schema: "public",
 					table: "messages"
 				},
-				(payload) => {
+				async (payload) => {
 					const message = payload.new as Message;
-					messages.value.push(message);
+					await messageStore.sendMessage(message.content);
+					conversationStore.updateConversation(conversationId, message.content);
 				}
 			)
 			.subscribe((status) => {
@@ -43,7 +37,8 @@
 			});
 	};
 
-	onMounted(() => {
+	onBeforeMount(() => {
+		messageStore.selectConversation(conversationId);
 		subscribeToConversation();
 	});
 
@@ -54,7 +49,7 @@
 
 <template>
 	<div class="page conversation">
-		<Messages :conversation-id="conversationId" :messages="messages" />
+		<Messages />
 	</div>
 </template>
 

@@ -4,7 +4,7 @@ export default defineNuxtConfig({
   srcDir: 'src/',
   imports: {
     dirs: [
-      'composables',
+      'composables/**',
       'utils',
       'validation'
     ]
@@ -16,7 +16,8 @@ export default defineNuxtConfig({
     '@nuxtjs/supabase',
     '@nuxtjs/tailwindcss',
     '@vee-validate/nuxt',
-    '@prisma/nuxt'
+    '@prisma/nuxt',
+    '@pinia/nuxt'
   ],
   prisma: {
     generateClient: false,

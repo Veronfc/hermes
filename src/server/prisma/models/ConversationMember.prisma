@@ -8,4 +8,6 @@ model ConversationMember {
 
   @@unique([user_id, conversation_id])
   @@map("conversation_members")
+  @@index([user_id])
+  @@index([conversation_id])
 }

@@ -6,3 +6,10 @@ export const findOrCreateDirectSchema = z.object({
 		.uuid({ message: "Not a valid UUID" })
 		.nonempty({ message: "Other Conversation Member ID required" })
 });
+
+export const checkMemberSchema = z.object({
+	conversationId: z
+		.string({ required_error: "Conversation ID required" })
+		.uuid({ message: "Not a valid UUID" })
+		.nonempty({ message: "Conversation ID required" })
+});

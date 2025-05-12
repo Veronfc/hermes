@@ -1,27 +1,21 @@
 <script lang="ts" setup>
-	const supabase = useSupabaseClient();
+	import { useAuthStore } from "~/stores/useAuthStore";
+	const auth = useAuthStore();
 	const code = useRoute().query.code?.toString();
 
+	if (auth.isAuthenticated) navigateTo("/conversations");
+
+	if (!code) navigateTo("/conversations");
+
 	try {
-		const user = useSupabaseUser();
-		navigateTo("/conversations");
-	} catch {}
+		await auth.loginWithCode(code!);
 
-	if (!code) {
-		navigateTo("/conversations");
-	}
-
-	const { error } = await supabase.auth.exchangeCodeForSession(code!);
-
-	if (error) {
-		alert("Database error");
-		console.error(
-			`Message: ${error.message}\nCode: ${error.code}\nName: ${error.name}`
-		);
-	} else {
 		setTimeout(() => {
-			return navigateTo("/conversations");
+			navigateTo("/conversations");
 		}, 3000);
+	} catch (error) {
+		//TODO: use toast
+		alert(error);
 	}
 </script>
 
