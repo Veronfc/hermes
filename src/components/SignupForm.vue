@@ -1,7 +1,5 @@
 <script lang="ts" setup>
-	import { useAuthStore } from "~/stores/useAuthStore";
-
-	const auth = useAuthStore();
+	const {signup} = useAuth();
 	const confirm = ref("");
 	const confirmMessage = ref("");
 	const success = ref(false);
@@ -29,7 +27,7 @@
 		}
 
 		try {
-			await auth.signup(values.email, values.password, values.username);
+			await signup(values.email, values.password, values.username);
 			success.value = true;
 		} catch (error) {
 			alert(error);

@@ -1,15 +1,15 @@
-export const useAuthStore = defineStore("auth", () => {
+import { useSupabaseUser, useSupabaseClient } from "#imports";
+
+export const useAuth = () => {
 	const user = useSupabaseUser();
 	const supabase = useSupabaseClient();
 
-	const isAuthenticated = computed(() => Boolean(user.value));
+	const isAuthenticated = computed(() => !!user.value);
 
 	const signup = async (email: string, password: string, username: string) => {
 		const response = await $fetch("/api/users/check-username", {
-			method: "post",
-			query: {
-				username: username
-			}
+			method: "POST",
+			query: { username }
 		});
 
 		if (response) {
@@ -20,12 +20,10 @@ export const useAuthStore = defineStore("auth", () => {
 		}
 
 		const { data, error } = await supabase.auth.signUp({
-			email: email,
-			password: password,
+			email,
+			password,
 			options: {
-				data: {
-					username: username
-				},
+				data: { username },
 				emailRedirectTo: "http://localhost:3000/confirm"
 			}
 		});
@@ -42,10 +40,7 @@ export const useAuthStore = defineStore("auth", () => {
 		}
 
 		if (error) {
-			console.error(
-				`Message: ${error.message}\nCode: ${error.code}\nName: ${error.name}`
-			);
-
+			console.error(`[Signup Error]: ${error.message} (${error.code})`);
 			throw createError({
 				statusCode: 500,
 				statusMessage: "Database error"
@@ -55,34 +50,32 @@ export const useAuthStore = defineStore("auth", () => {
 
 	const login = async (email: string, password: string) => {
 		const { error } = await supabase.auth.signInWithPassword({
-			email: email,
-			password: password
+			email,
+			password
 		});
 
 		if (error) {
 			if (error.code === "email_not_confirmed") {
 				alert(
-					"Email not verified.\nPlease click on the confirmation link in the verification email sent to you."
+					"Email not verified.\nPlease click on the confirmation link in the verification email."
 				);
 
 				//TODO: make resend optional
 				const { error: resendError } = await supabase.auth.resend({
 					type: "signup",
-					email: email,
+					email,
 					options: {
 						emailRedirectTo: "http://localhost:3000/confirm"
 					}
 				});
 
 				if (resendError) {
-					//EXP: for debugging
 					console.error(
-						`Message: ${resendError.message}\nCode: ${resendError.code}\nName: ${resendError.name}`
+						`[Resend Error]: ${resendError.message} (${resendError.code})`
 					);
-
 					throw createError({
 						statusCode: 500,
-						statusMessage: "Database error.\n\nPlease try again in a minute."
+						statusMessage: "Database error. Please try again in a minute."
 					});
 				}
 			}
@@ -94,12 +87,7 @@ export const useAuthStore = defineStore("auth", () => {
 				});
 			}
 
-			//EXP: for debugging
-			console.error(
-				`Message: ${error.message}\nCode: ${error.code}\nName: ${error.name}`
-			);
-
-			//EXP: for unexpected errors
+			console.error(`[Login Error]: ${error.message} (${error.code})`);
 			throw createError({
 				statusCode: 500,
 				statusMessage: "A server error has occurred"
@@ -108,13 +96,10 @@ export const useAuthStore = defineStore("auth", () => {
 	};
 
 	const loginWithCode = async (code: string) => {
-		const { error } = await supabase.auth.exchangeCodeForSession(code!);
+		const { error } = await supabase.auth.exchangeCodeForSession(code);
 
 		if (error) {
-			console.error(
-				`Message: ${error.message}\nCode: ${error.code}\nName: ${error.name}`
-			);
-
+			console.error(`[Exchange Code Error]: ${error.message} (${error.code})`);
 			throw createError({
 				statusCode: 500,
 				statusMessage: "A server error has occurred"
@@ -126,5 +111,12 @@ export const useAuthStore = defineStore("auth", () => {
 		await supabase.auth.signOut();
 	};
 
-	return { user, isAuthenticated, signup, login, loginWithCode, logout };
-});
+	return {
+		user,
+		isAuthenticated,
+		signup,
+		login,
+		loginWithCode,
+		logout
+	};
+};

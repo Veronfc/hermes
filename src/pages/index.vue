@@ -1,16 +1,14 @@
 <script setup lang="ts">
-	import { useAuthStore } from "~/stores/useAuthStore";
-
 	definePageMeta({
 		middleware: "check-login"
 	});
-	const auth = useAuthStore();
+	const {user, isAuthenticated} = useAuth();
 </script>
 
 <template>
 	<div class="page">
-		<span v-if="auth.user">{{
-			`Email: ${auth.user?.email}\nUsername: ${auth.user?.user_metadata.username}`
+		<span v-if="isAuthenticated">{{
+			`Email: ${user?.email}\nUsername: ${user?.user_metadata.username}`
 		}}</span>
 		<span v-else>Not logged in</span>
 	</div>

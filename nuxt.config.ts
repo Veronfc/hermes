@@ -17,7 +17,7 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@vee-validate/nuxt',
     '@prisma/nuxt',
-    '@pinia/nuxt'
+    '@hebilicious/vue-query-nuxt'
   ],
   prisma: {
     generateClient: false,

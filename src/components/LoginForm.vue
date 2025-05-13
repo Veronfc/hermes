@@ -1,7 +1,5 @@
 <script setup lang="ts">
-	import { useAuthStore } from "~/stores/useAuthStore";
-
-	const auth = useAuthStore();
+	const {login} = useAuth();
 
 	const { handleSubmit, errors } = useForm({
 		validationSchema: toTypedSchema(loginSchema)
@@ -12,7 +10,7 @@
 
 	const onSubmit = handleSubmit(async (values) => {
 		try {
-			await auth.login(values.email, values.password);
+			await login(values.email, values.password);
 			navigateTo("/conversations");
 		} catch (error) {
 			alert(error);

@@ -1,11 +1,9 @@
 <script setup lang="ts">
-	import { useAuthStore } from "~/stores/useAuthStore";
-	import { useConversationStore } from "~/stores/useConversationStore";
-	import { useMessageStore } from "~/stores/useMessageStore";
-
-	const auth = useAuthStore();
-	const messageStore = useMessageStore();
-	const conversationStore = useConversationStore();
+	const route = useRoute()
+	const conversationId = computed(() => <string>route.params.id)
+	const { user } = useAuth();
+	const { updateCache } = useConversations();
+	const { messages, sendMessage, isLoading, isSending } = useMessages(conversationId);
 
 	const { handleSubmit } = useForm({
 		validationSchema: toTypedSchema(sendMessageSchema)
@@ -15,28 +13,20 @@
 
 	const scrollAnchor = useTemplateRef("scroll-anchor");
 
-	const isSending = ref(false);
 	const errorMessage = ref("");
 	let errorTimeout: ReturnType<typeof setTimeout>;
 
-	const sendMessage = handleSubmit(
+	const send = handleSubmit(
 		async (values) => {
 			if (isSending.value) return;
 
-			isSending.value = true;
-
 			try {
-				messageStore.sendMessage(values.content);
-				conversationStore.updateConversation(
-					messageStore.conversationId,
-					values.content
-				);
+				await sendMessage(values.content);
+				updateCache(conversationId.value, values.content, user.value!.id);
 
 				content.value = "";
 			} catch (error) {
 				errorMessage.value = error as string;
-			} finally {
-				isSending.value = false;
 			}
 		},
 		({ errors }) => {
@@ -67,7 +57,7 @@
 	};
 
 	watch(
-		() => messageStore.messages,
+		() => messages.value,
 		async () => {
 			await nextTick();
 			scrollAnchor.value?.scrollIntoView({ behavior: "smooth" });
@@ -90,13 +80,14 @@
 
 	onMounted(async () => {
 		await nextTick();
-		scrollAnchor.value?.scrollIntoView();
+		scrollAnchor.value?.scrollIntoView({ behavior: "instant" });
 	});
 </script>
 
 <template>
 	<div class="conversation">
-		<form @submit="sendMessage" class="message-input">
+		<Icon class="loader" name="svg-spinners:180-ring" v-if="isLoading"></Icon>
+		<form @submit="send" class="message-input">
 			<input
 				v-model="content"
 				name="message"
@@ -115,15 +106,15 @@
 		</form>
 		<div class="messages">
 			<div
-				v-for="message in messageStore.messages"
+				v-for="message in messages"
 				:key="message.id"
 				class="message"
-				:class="auth.user!.id === message.sender_id ? 'right' : 'left'">
+				:class="user!.id === message.sender_id ? 'right' : 'left'">
 				<span class="message-text">{{ message.content }}</span>
 				<span
 					class="line"
 					:class="
-						auth.user!.id === message.sender_id ? 'right' : 'left'
+						user!.id === message.sender_id ? 'right' : 'left'
 					"></span>
 				<span class="message-time">{{
 					convertUtcToLocal(message.created_at)
@@ -136,7 +127,7 @@
 
 <style scoped>
 	.conversation {
-		@apply flex h-svh w-svw flex-col-reverse gap-4 border-border p-8;
+		@apply relative flex h-svh w-svw flex-col-reverse gap-4 border-border p-8;
 
 		.messages {
 			@apply flex flex-col gap-2 overflow-scroll p-[1px];
@@ -224,6 +215,9 @@
 			.toast-leave-to {
 				@apply top-0 opacity-5 ease-linear;
 			}
+		}
+		.loader {
+			@apply absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 text-text-primary !important;
 		}
 	}
 </style>

@@ -6,19 +6,20 @@
 
 	import type { RealtimeChannel } from "@supabase/realtime-js";
 	import type { Message } from "@prisma/client";
-	import { useConversationStore } from "~/stores/useConversationStore";
-	import { useMessageStore } from "~/stores/useMessageStore";
 
-	const conversationId = useRoute().params.id as string;
-	const conversationStore = useConversationStore();
-	const messageStore = useMessageStore();
+	const route = useRoute()
+	const conversationId = computed(() => <string>route.params.id);
+	const { user } = useAuth();
+	const { updateCache: updateMessageCache } = useMessages(conversationId)
+	const { updateCache: updateConversationCache } = useConversations();
 	const supabase = useSupabaseClient();
+	const queryClient = useQueryClient()
 
 	let channel: RealtimeChannel;
 
 	const subscribeToConversation = async () => {
 		channel = supabase
-			.channel(`conversation:${conversationId}`)
+			.channel("messages")
 			.on(
 				"postgres_changes",
 				{
@@ -28,8 +29,27 @@
 				},
 				async (payload) => {
 					const message = payload.new as Message;
-					await messageStore.sendMessage(message.content);
-					conversationStore.updateConversation(conversationId, message.content);
+					if (
+						message.conversation_id === conversationId.value &&
+						message.sender_id !== user.value?.id
+					) {
+						updateMessageCache(message)
+					} 
+					else if (message.sender_id !== user.value?.id) {
+						queryClient.setQueryData<Message[]>(
+							["messages", message.conversation_id],
+							(cached) => {return cached ? [...cached, message] : [message]}
+						)
+
+						queryClient.setQueryDefaults(['messages', message.conversation_id], {
+							meta: {isPartial: true}
+						})
+					}
+					updateConversationCache(
+						message.conversation_id,
+						message.content,
+						message.sender_id
+					);
 				}
 			)
 			.subscribe((status) => {
@@ -37,8 +57,7 @@
 			});
 	};
 
-	onBeforeMount(() => {
-		messageStore.selectConversation(conversationId);
+	onMounted(() => {
 		subscribeToConversation();
 	});
 

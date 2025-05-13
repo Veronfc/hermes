@@ -4,6 +4,7 @@ model Conversation {
   updated_at           DateTime             @updatedAt @db.Timestamptz(3)
   type                 Type                 @default(direct)
   last_message         String?
+  last_sender_id String? @db.Uuid
   members              ConversationMember[]
   messages             Message[]
 

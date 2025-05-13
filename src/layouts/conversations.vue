@@ -1,7 +1,6 @@
 <script lang="ts" setup>
-import { useConversationStore } from '~/stores/useConversationStore';
-
-	const conversationStore = useConversationStore()
+	const { user } = useAuth();
+	const { conversations, isLoading } = useConversations();
 
 	const convertUtcToLocal = (timestamp?: Date) => {
 		if (!timestamp) {
@@ -30,20 +29,27 @@ import { useConversationStore } from '~/stores/useConversationStore';
 		<div class="list">
 			<NuxtLink
 				class="conversation"
-				v-for="conversation in conversationStore.conversations"
+				v-for="conversation in conversations"
 				:key="conversation.id"
 				:to="`/conversations/${conversation.id}`">
 				<span class="username" :key="conversation.members[0].user.id">
 					{{ conversation.members[0].user.username }}
 				</span>
-				<span class="message">
-					{{ conversation.last_message }}
-				</span>
+				<div class="message-content">
+					<Icon
+						name="mdi-call-made"
+						v-if="conversation.last_sender_id === user?.id"
+						class="call-icon"></Icon>
+					<Icon name="mdi:call-received" v-else class="call-icon"></Icon>
+					<span class="message">
+						{{ conversation.last_message }}
+					</span>
+				</div>
 				<span class="time">
 					{{ convertUtcToLocal(conversation.updated_at) }}
 				</span>
 			</NuxtLink>
-			<Icon class="loader" name="svg-spinners:180-ring" v-if="conversationStore.isLoading"></Icon>
+			<Icon class="loader" name="svg-spinners:180-ring" v-if="isLoading"></Icon>
 		</div>
 		<slot />
 	</div>
@@ -57,22 +63,30 @@ import { useConversationStore } from '~/stores/useConversationStore';
 			@apply relative flex min-w-[20rem] max-w-[20rem] flex-col gap-4 bg-modal p-4;
 
 			.conversation {
-				@apply box-border flex h-24 flex-col justify-center rounded-2xl border border-border bg-input p-4 py-2 font-body text-text-primary opacity-75;
+				@apply box-border flex flex-col justify-center rounded-2xl border border-border bg-input p-2 px-3 font-body text-text-primary opacity-75;
 
 				&:hover {
 					@apply border-accent-border;
 				}
 
 				.username {
-					@apply font-title tracking-widest;
+					@apply text-center font-body text-xl tracking-widest;
 				}
 
-				.message {
-					@apply truncate;
+				.message-content {
+					@apply flex flex-row items-center gap-2;
+
+					.call-icon {
+						@apply text-accent;
+					}
+
+					.message {
+						@apply truncate;
+					}
 				}
 
 				.time {
-					@apply border-t pt-1 text-right text-xs text-text-secondary;
+					@apply pt-1 text-right text-xs text-text-secondary;
 				}
 			}
 

@@ -1,14 +1,13 @@
 <script lang="ts" setup>
-	import { useAuthStore } from "~/stores/useAuthStore";
-	const auth = useAuthStore();
+	const {isAuthenticated, loginWithCode} = useAuth();
 	const code = useRoute().query.code?.toString();
 
-	if (auth.isAuthenticated) navigateTo("/conversations");
+	if (isAuthenticated) navigateTo("/conversations");
 
 	if (!code) navigateTo("/conversations");
 
 	try {
-		await auth.loginWithCode(code!);
+		await loginWithCode(code!);
 
 		setTimeout(() => {
 			navigateTo("/conversations");

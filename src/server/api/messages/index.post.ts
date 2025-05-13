@@ -67,7 +67,8 @@ export default defineEventHandler(async (event) => {
 				id: conversationId
 			},
 			data: {
-				last_message: content
+				last_message: content,
+				last_sender_id: senderId
 			}
 		});
 
