@@ -1,13 +1,9 @@
 <script setup lang="ts">
-	import type { Message } from "@prisma/client";
-	import { FetchError } from "ofetch";
-
-	const {refresh} = await useConversations()
-	const user = useSupabaseUser();
-	const props = defineProps<{
-		messages: Message[];
-		conversationId: string;
-	}>();
+	const route = useRoute()
+	const conversationId = computed(() => <string>route.params.id)
+	const { user } = useAuth();
+	const { updateCache } = useConversations();
+	const { messages, sendMessage, isLoading, isSending } = useMessages(conversationId);
 
 	const { handleSubmit } = useForm({
 		validationSchema: toTypedSchema(sendMessageSchema)
@@ -17,56 +13,20 @@
 
 	const scrollAnchor = useTemplateRef("scroll-anchor");
 
-	const isSending = ref(false);
 	const errorMessage = ref("");
 	let errorTimeout: ReturnType<typeof setTimeout>;
 
-  const convertUtcToLocal = (timestamp: Date) => {
-    if (!timestamp) {
-      return
-    }
-
-		const utc = new Date(timestamp);
-    const today = new Date()
-
-    if (utc.getDate() !== today.getDate()) {
-      return utc.toLocaleString("en-GB", {
-			hour12: false,
-			timeStyle: 'short',
-			dateStyle: "medium"
-		});
-    }
-
-		return utc.toLocaleString("en-GB", {
-			hour12: false,
-			timeStyle: "short",
-		});
-	};
-
-	const sendMessage = handleSubmit(
+	const send = handleSubmit(
 		async (values) => {
 			if (isSending.value) return;
 
-			isSending.value = true;
-
 			try {
-				await $fetch("/api/messages", {
-					method: "post",
-					body: {
-						conversationId: props.conversationId,
-						content: values.content
-					}
-				});
-				refresh()
+				await sendMessage(values.content);
+				updateCache(conversationId.value, values.content, user.value!.id);
+
 				content.value = "";
 			} catch (error) {
-				if (error instanceof FetchError) {
-					errorMessage.value = error.statusMessage!;
-					console.error(error.statusCode);
-					console.log(error.statusMessage);
-				}
-			} finally {
-				isSending.value = false;
+				errorMessage.value = error as string;
 			}
 		},
 		({ errors }) => {
@@ -74,8 +34,30 @@
 		}
 	);
 
+	const convertUtcToLocal = (timestamp: Date) => {
+		if (!timestamp) {
+			return;
+		}
+
+		const utc = new Date(timestamp);
+		const today = new Date();
+
+		if (utc.getDate() !== today.getDate()) {
+			return utc.toLocaleString("en-GB", {
+				hour12: false,
+				timeStyle: "short",
+				dateStyle: "medium"
+			});
+		}
+
+		return utc.toLocaleString("en-GB", {
+			hour12: false,
+			timeStyle: "short"
+		});
+	};
+
 	watch(
-		() => props.messages,
+		() => messages.value,
 		async () => {
 			await nextTick();
 			scrollAnchor.value?.scrollIntoView({ behavior: "smooth" });
@@ -98,13 +80,14 @@
 
 	onMounted(async () => {
 		await nextTick();
-		scrollAnchor.value?.scrollIntoView();
-	})
+		scrollAnchor.value?.scrollIntoView({ behavior: "instant" });
+	});
 </script>
 
 <template>
 	<div class="conversation">
-		<form @submit="sendMessage" class="message-input">
+		<Icon class="loader" name="svg-spinners:180-ring" v-if="isLoading"></Icon>
+		<form @submit="send" class="message-input">
 			<input
 				v-model="content"
 				name="message"
@@ -130,7 +113,9 @@
 				<span class="message-text">{{ message.content }}</span>
 				<span
 					class="line"
-					:class="user!.id === message.sender_id ? 'right' : 'left'"></span>
+					:class="
+						user!.id === message.sender_id ? 'right' : 'left'
+					"></span>
 				<span class="message-time">{{
 					convertUtcToLocal(message.created_at)
 				}}</span>
@@ -142,7 +127,7 @@
 
 <style scoped>
 	.conversation {
-		@apply flex h-svh w-svw flex-col-reverse gap-4 border-border p-8;
+		@apply relative flex h-svh w-svw flex-col-reverse gap-4 border-border p-8;
 
 		.messages {
 			@apply flex flex-col gap-2 overflow-scroll p-[1px];
@@ -230,6 +215,9 @@
 			.toast-leave-to {
 				@apply top-0 opacity-5 ease-linear;
 			}
+		}
+		.loader {
+			@apply absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 text-text-primary !important;
 		}
 	}
 </style>

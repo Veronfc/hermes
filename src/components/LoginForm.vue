@@ -1,5 +1,5 @@
 <script setup lang="ts">
-	const supabase = useSupabaseClient();
+	const {login} = useAuth();
 
 	const { handleSubmit, errors } = useForm({
 		validationSchema: toTypedSchema(loginSchema)
@@ -8,59 +8,21 @@
 	const { value: email } = useField("email");
 	const { value: password } = useField("password");
 
-	const login = handleSubmit(async (values) => {
-		const { data, error } = await supabase.auth.signInWithPassword({
-			email: values.email,
-			password: values.password
-		});
-
-		if (error) {
-			if (error.code === "email_not_confirmed") {
-				alert(
-					"Email not verified.\nPlease click on the confirmation link in the verification email sent to you."
-				);
-
-				const { error: resendError } = await supabase.auth.resend({
-					type: "signup",
-					email: values.email,
-					options: {
-						emailRedirectTo: "http://localhost:3000/confirm"
-					}
-				});
-
-				if (resendError) {
-					alert("Database error.\n\nPlease try again in a minute.");
-					console.error(
-						`Message: ${resendError.message}\nCode: ${resendError.code}\nName: ${resendError.name}`
-					);
-
-					return;
-				}
-
-				return;
-			}
-
-			if (error.code === "invalid_credentials") {
-				alert("Incorrect email address or password.");
-
-				return;
-			}
-
-			alert("Database error");
-			console.error(
-				`Message: ${error.message}\nCode: ${error.code}\nName: ${error.name}`
-			);
-			return;
+	const onSubmit = handleSubmit(async (values) => {
+		try {
+			await login(values.email, values.password);
+			navigateTo("/conversations");
+		} catch (error) {
+			alert(error);
+			//TODO: use toast
 		}
-
-		navigateTo("/conversations");
 	});
 </script>
 
 <template>
 	<div class="modal login">
 		<span class="modal-title">Welcome back</span>
-		<form @submit="login">
+		<form @submit="onSubmit">
 			<section>
 				<HInput
 					input-name="email"

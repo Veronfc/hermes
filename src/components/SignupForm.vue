@@ -1,10 +1,8 @@
 <script lang="ts" setup>
-	const supabase = useSupabaseClient();
-
+	const {signup} = useAuth();
 	const confirm = ref("");
 	const confirmMessage = ref("");
 	const success = ref(false);
-	const loading = ref(false);
 
 	const { handleSubmit, errors } = useForm({
 		validationSchema: toTypedSchema(signupSchema)
@@ -22,53 +20,19 @@
 		}
 	});
 
-	const signup = handleSubmit(async (values) => {
+	const onSubmit = handleSubmit(async (values) => {
 		if (confirmMessage.value) {
 			alert(confirmMessage.value);
 			return;
 		}
 
-		const response = await $fetch("/api/users/check-username", {
-			method: "post",
-			query: {
-				username: values.username
-			}
-		});
-
-		if (response) {
-			alert("Please enter a different username");
-			return;
+		try {
+			await signup(values.email, values.password, values.username);
+			success.value = true;
+		} catch (error) {
+			alert(error);
+			//TODO: Add toast notification for errors
 		}
-
-		const { data, error } = await supabase.auth.signUp({
-			email: values.email,
-			password: values.password,
-			options: {
-				data: {
-					username: values.username
-				},
-				emailRedirectTo: "http://localhost:3000/confirm"
-			}
-		});
-
-		if (
-			data.session === null &&
-			error === null &&
-			data.user?.identities?.length === 0
-		) {
-			alert("Please enter a different email address");
-			return;
-		}
-
-		if (error) {
-			alert("Database error");
-			console.error(
-				`Message: ${error.message}\nCode: ${error.code}\nName: ${error.name}`
-			);
-			return;
-		}
-
-		success.value = true;
 	});
 </script>
 <template>
@@ -82,7 +46,7 @@
 	</div>
 	<div class="modal signup" v-else>
 		<span class="modal-title">Create account</span>
-		<form @submit="signup">
+		<form @submit="onSubmit">
 			<section>
 				<HInput
 					input-name="email"

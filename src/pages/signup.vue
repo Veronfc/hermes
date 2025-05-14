@@ -1,12 +1,12 @@
 <script lang="ts" setup>
-	const user = useSupabaseUser();
+	const {isAuthenticated} = useAuth()
 </script>
 
 <template>
 	<div class="page">
-		<SignupForm v-if="!user" />
+		<SignupForm v-if="!isAuthenticated" />
 		<LoggedIn v-else />
 	</div>
 </template>
 
-<style scoped></style>
+<style></style>

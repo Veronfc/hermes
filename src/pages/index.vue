@@ -1,10 +1,13 @@
 <script setup lang="ts">
-	const user = useSupabaseUser();
+	definePageMeta({
+		middleware: "check-login"
+	});
+	const {user, isAuthenticated} = useAuth();
 </script>
 
 <template>
 	<div class="page">
-		<span v-if="user">{{
+		<span v-if="isAuthenticated">{{
 			`Email: ${user?.email}\nUsername: ${user?.user_metadata.username}`
 		}}</span>
 		<span v-else>Not logged in</span>

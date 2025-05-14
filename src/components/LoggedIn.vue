@@ -1,6 +1,5 @@
 <script setup lang="ts">
-	const user = useSupabaseUser();
-	const supabase = useSupabaseClient();
+	const {user, logout} = useAuth();
 </script>
 
 <template>
@@ -8,10 +7,10 @@
 		<span class="modal-title">You're already logged in</span>
 		<span>Logged in as: {{ user?.user_metadata.username }}</span>
 		<div class="buttons">
-			<HButton @button-click="navigateTo('/')" class="button-main"
-				>Go home</HButton
+			<HButton @button-click="navigateTo('/conversations')" class="button-main"
+				>Go to conversations</HButton
 			>
-			<HButton @button-click="supabase.auth.signOut()" class="button-secondary"
+			<HButton @button-click="logout" class="button-secondary"
 				>Log out</HButton
 			>
 		</div>
