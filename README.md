@@ -51,11 +51,11 @@ The primary goal of the Hermes project is to build a comprehensive messaging app
 
 This checklist tracks the progress through the planned development milestones:
 
-- [ ] **Milestone 1: Project Setup and Core One-on-One Messaging**
+- [x] **Milestone 1: Project Setup and Core One-on-One Messaging**
   - [x] 1.1 Project Setup
   - [x] 1.2 User Authentication (Supabase Auth)
   - [x] 1.3 Core Messaging Functionality (Sending/Receiving 1:1)
-  - [ ] 1.4 Core Messaging UI
+  - [x] 1.4 Core Messaging UI
 - [ ] **Milestone 2: Group Messaging and Core UX**
   - [ ] 2.1 Group Conversation Support
   - [ ] 2.2 Conversation List UI
