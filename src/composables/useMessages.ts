@@ -20,7 +20,7 @@ export const useMessages = (conversationId: Ref<string>) => {
 	const fetchAll = useQuery<Message[]>({
 		queryKey: ["messages", conversationId.value],
 		queryFn: () => fetchMessages(conversationId.value),
-		enabled: !!conversationId.value,
+		enabled: computed(() => !!conversationId.value),
 		refetchOnWindowFocus: false,
 		staleTime: 1000 * 30,
 		meta: {

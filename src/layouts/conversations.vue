@@ -1,6 +1,63 @@
 <script lang="ts" setup>
+	import type { RealtimeChannel } from "@supabase/realtime-js";
+	import type { Message } from "@prisma/client";
+
 	const { user } = useAuth();
 	const { conversations, isLoading } = useConversations();
+	const route = useRoute()
+	const conversationId = computed(() => <string | undefined>route.params.id)
+	const { updateCache: updateConversationCache } = useConversations();
+	const supabase = useSupabaseClient();
+	const queryClient = useQueryClient()
+
+	let channel: RealtimeChannel;
+
+	const subscribeToConversation = async () => {
+		channel = supabase
+			.channel("messages")
+			.on(
+				"postgres_changes",
+				{
+					event: "INSERT",
+					schema: "public",
+					table: "messages"
+				},
+				async (payload) => {
+					const message = payload.new as Message;
+					if (
+						message.conversation_id === conversationId.value &&
+						message.sender_id !== user.value?.id
+					) {
+						updateMessageCache(message.conversation_id)(message)
+					} 
+					else if (message.sender_id !== user.value?.id) {
+						const queryKey = ['messages', message.conversation_id]
+
+						const cachedMessages = queryClient.getQueryData<Message[]>(queryKey)
+						const meta = queryClient.getQueryCache().find({queryKey})?.meta
+
+						if (cachedMessages && !meta?.isPartial) {
+							queryClient.setQueryData(queryKey, [...cachedMessages, message])
+						} else {
+							queryClient.invalidateQueries({queryKey})
+						}
+					}
+					updateConversationCache(
+						message.conversation_id,
+						message.content,
+						message.sender_id
+					);
+				}
+			)
+			.subscribe((status) => {
+				console.log("Channel status", status);
+			});
+	};
+
+	const updateMessageCache = (conversationId: string) => {
+		const {updateCache} = useMessages(ref(conversationId))
+		return updateCache
+	}
 
 	const convertUtcToLocal = (timestamp?: Date) => {
 		if (!timestamp) {
@@ -22,6 +79,14 @@
 			timeStyle: "short"
 		});
 	};
+
+	onMounted(() => {
+		subscribeToConversation();
+	});
+
+	onUnmounted(() => {
+		channel?.unsubscribe();
+	});
 </script>
 
 <template>
@@ -35,7 +100,7 @@
 				<span class="username" :key="conversation.members[0].user.id">
 					{{ conversation.members[0].user.username }}
 				</span>
-				<div class="message-content">
+				<div class="message-content" v-if="conversation.last_message">
 					<Icon
 						name="mdi-call-made"
 						v-if="conversation.last_sender_id === user?.id"
@@ -44,10 +109,10 @@
 					<span class="message">
 						{{ conversation.last_message }}
 					</span>
+					<span class="time">
+						{{ convertUtcToLocal(conversation.updated_at) }}
+					</span>
 				</div>
-				<span class="time">
-					{{ convertUtcToLocal(conversation.updated_at) }}
-				</span>
 			</NuxtLink>
 			<Icon class="loader" name="svg-spinners:180-ring" v-if="isLoading"></Icon>
 		</div>
@@ -83,10 +148,10 @@
 					.message {
 						@apply truncate;
 					}
-				}
 
-				.time {
-					@apply pt-1 text-right text-xs text-text-secondary;
+					.time {
+						@apply pt-1 text-xs text-text-secondary;
+					}
 				}
 			}
 
