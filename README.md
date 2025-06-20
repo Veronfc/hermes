@@ -1,3 +1,5 @@
+⏸️ On Hold
+
 # **Hermes: A Real-Time Messaging Application**
 
 Hermes is a full-stack real-time messaging application built to demonstrate proficiency in various web development technologies and architectural patterns. The goal is to create a robust and feature-rich platform for users to communicate instantly.
